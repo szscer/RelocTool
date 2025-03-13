@@ -142,4 +142,5 @@ fig.show()
 fig.write_image("saved_map.png")                                                                                                                                            
                                                                                                                                                                             
 # Provide the final answer                                                                                                                                                  
-final_answer(fig)
+#final_answer(fig)
+print(df.sort_values(by=["relocation_cost"], ascending=False))

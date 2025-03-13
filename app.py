@@ -109,6 +109,7 @@ def check_reasoning_and_plot(final_answer, agent_memory):
 
 manager_agent = CodeAgent(
     #model=HfApiModel("deepseek-ai/DeepSeek-R1", max_tokens=8096),
+    #model=HfApiModel("meta-llama/Llama-3.3-70B-Instruct")
     model = HfApiModel("Qwen/Qwen2.5-Coder-32B-Instruct", max_tokens=8096),
     tools=[calculate_relocation_costs],
     managed_agents=[web_agent],
