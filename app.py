@@ -1,7 +1,8 @@
 # We first make a tool to get the cargo plane transfer time.
 from smolagents import tool
-from smolagents import CodeAgent, HfApiModel, DuckDuckGoSearchTool, VisitWebpageTool
+from smolagents import CodeAgent, HfApiModel, DuckDuckGoSearchTool, VisitWebpageTool, ToolCallingAgent
 
+import os
 
 @tool
 def calculate_relocation_costs(
@@ -10,7 +11,7 @@ def calculate_relocation_costs(
     estimated_moving_costs: float,  # Average speed for cargo planes
 ) -> float:
     """
-    Calculate relocation costs from a given location to new destnation.  
+    Calculate relocation costs from a given location to new destination.  
 
     Args:
         median_sales_price_origin: sales price of current home
@@ -46,12 +47,14 @@ def calculate_relocation_costs(
     reloc_cost = estimated_moving_costs - sale_surplus
     return round(reloc_cost, 2)
 
+#connect to hugging face
+from huggingface_hub import login; login(os.environ['HF_TOKEN'])
 
 model = HfApiModel(
     "Qwen/Qwen2.5-Coder-32B-Instruct", max_tokens=8096
 ) 
 
-web_agent = CodeAgent(
+web_agent = ToolCallingAgent(
     model=model,
     tools=[
         DuckDuckGoSearchTool(),
@@ -105,7 +108,8 @@ def check_reasoning_and_plot(final_answer, agent_memory):
 
 
 manager_agent = CodeAgent(
-    model=HfApiModel("deepseek-ai/DeepSeek-R1", max_tokens=8096),
+    #model=HfApiModel("deepseek-ai/DeepSeek-R1", max_tokens=8096),
+    model = HfApiModel("Qwen/Qwen2.5-Coder-32B-Instruct", max_tokens=8096),
     tools=[calculate_relocation_costs],
     managed_agents=[web_agent],
     additional_authorized_imports=[
