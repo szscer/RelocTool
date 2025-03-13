@@ -1,0 +1,7 @@
+smolagents
+geopandas
+plotly
+shapely
+json
+pandas
+numpy
