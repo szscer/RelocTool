@@ -109,8 +109,8 @@ def check_reasoning_and_plot(final_answer, agent_memory):
 
 manager_agent = CodeAgent(
     #model=HfApiModel("deepseek-ai/DeepSeek-R1", max_tokens=8096),
-    #model=HfApiModel("meta-llama/Llama-3.3-70B-Instruct")
-    model = HfApiModel("Qwen/Qwen2.5-Coder-32B-Instruct", max_tokens=8096),
+    model=HfApiModel("meta-llama/Llama-3.3-70B-Instruct"),
+    #model = HfApiModel("Qwen/Qwen2.5-Coder-32B-Instruct", max_tokens=8096),
     tools=[calculate_relocation_costs],
     managed_agents=[web_agent],
     additional_authorized_imports=[
@@ -120,6 +120,7 @@ manager_agent = CodeAgent(
         "json",
         "pandas",
         "numpy",
+        "requests"
     ],
     planning_interval=5,
     verbosity_level=2,
@@ -128,11 +129,11 @@ manager_agent = CodeAgent(
 )
 
 manager_agent.run("""
-Find the ten best places to retire in the United States and calculate the relocation costs for Sonoma, CA, (38.2919° N, 122.4580° W).
-Consider median sales prices for origin and destination locations, and average size houses for the median price in both locations when
-determining estimated moving costs. Also, provide full-service moving costs only. 
-Represent this as spatial map of the world, with the locations represented as scatter points with a color that depends on the relocation cost, 
-and save it to saved_map.png!
+Find the ten best locations to retire in North Carolina and calculate the relocation costs for Sonoma, CA, (38.2919° N, 122.4580° W).
+Consider median sales prices for a 2000 sqf house at origin and median sales prices for a 3000 sqf house at the destination locations. 
+Provide full-service moving costs for a 2000 sqf house at the origin. 
+Represent this as a spatial map of the world, with the locations represented as scatter points with a color that depends on the relocation cost, 
+and save it to saved_map_2.png!
 
 Here's an example of how to plot and return a map:
 import plotly.express as px
@@ -140,7 +141,7 @@ df = px.data.carshare()
 fig = px.scatter_map(df, lat="centroid_lat", lon="centroid_lon", text="name", color="peak_hour", size=100,
      color_continuous_scale=px.colors.sequential.Magma, size_max=15, zoom=1)
 fig.show()
-fig.write_image("saved_image.png")
+fig.write_image("saved_image_2.png")
 final_answer(fig)
 
 Never try to process strings using code: when you have a string to read, just print it and you'll see it.
