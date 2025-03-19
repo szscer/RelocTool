@@ -1,6 +1,6 @@
 # We first make a tool to get the cargo plane transfer time.
 from smolagents import tool
-from smolagents import CodeAgent, HfApiModel, DuckDuckGoSearchTool, VisitWebpageTool, ToolCallingAgent
+from smolagents import CodeAgent, HfApiModel, DuckDuckGoSearchTool, GoogleSearchTool, VisitWebpageTool, ToolCallingAgent
 
 import os
 
@@ -58,6 +58,7 @@ web_agent = ToolCallingAgent(
     model=model,
     tools=[
         DuckDuckGoSearchTool(),
+        #GoogleSearchTool(provider="serpapi"),
         VisitWebpageTool(),
         calculate_relocation_costs,
     ],
@@ -69,13 +70,13 @@ web_agent = ToolCallingAgent(
 
 from smolagents.utils import encode_image_base64, make_image_url
 from smolagents import OpenAIServerModel
-import os
+
 from PIL import Image
 
 def check_reasoning_and_plot(final_answer, agent_memory):
     final_answer
-    multimodal_model = OpenAIServerModel("gpt-4o", max_tokens=8096)
-    filepath = "saved_map.png"
+    multimodal_model = OpenAIServerModel("gpt-4o", max_tokens=8096, api_key=os.environ['OPENAI_API_KEY'])
+    filepath = "saved_map_2.png"
     assert os.path.exists(filepath), "Make sure to save the plot under saved_map.png!"
     image = Image.open(filepath)
     prompt = (
@@ -120,29 +121,55 @@ manager_agent = CodeAgent(
         "json",
         "pandas",
         "numpy",
-        "requests"
+        "requests",
     ],
     planning_interval=5,
     verbosity_level=2,
     final_answer_checks=[check_reasoning_and_plot],
-    max_steps=15,
+    max_steps=50,
 )
 
+origin = input("Enter name of town or city where you currently reside.Specify state, province and/or country. OK to use abbreviations (e.g CA = California):")
+area_of_search = input("Enter country, state, province, region, etc you would like me to search:")
+origin_size = input("Enter size current property:")
+destination_size = input("Enter desired size of new property:")
+loc_num = input("Enter number of locations you would like to compare:") 
+
 manager_agent.run("""
-Find the ten best locations to retire in North Carolina and calculate the relocation costs for Sonoma, CA, (38.2919° N, 122.4580° W).
-Consider median sales prices for a 2000 sqf house at origin and median sales prices for a 3000 sqf house at the destination locations. 
-Provide full-service moving costs for a 2000 sqf house at the origin. 
+Find the """ + loc_num + """ best locations to retire in """ + area_of_search  + """ and calculate 
+the relocation costs for """ + origin + """.
+Consider median sales prices for a """ + origin_size + """ house at origin and median sales prices for a """ + destination_size + """ house at the destination locations. 
+Provide full-service moving costs for a """ + origin_size +  """ house at the origin. 
 Represent this as a spatial map of the world, with the locations represented as scatter points with a color that depends on the relocation cost, 
 and save it to saved_map_2.png!
 
 Here's an example of how to plot and return a map:
-import plotly.express as px
-df = px.data.carshare()
-fig = px.scatter_map(df, lat="centroid_lat", lon="centroid_lon", text="name", color="peak_hour", size=100,
-     color_continuous_scale=px.colors.sequential.Magma, size_max=15, zoom=1)
-fig.show()
-fig.write_image("saved_image_2.png")
-final_answer(fig)
+                                                                                                                        
+                                                                                                                                                                            
+# Create a data frame for plotting                                                                                                                                          
+import pandas as pd                                                                                                                                                         
+                                                                                                                                                                            
+data = {                                                                                                                                                                    
+    "name": ["Sonoma, CA"] + locations,                                                                                                                                     
+    "centroid_lat": [coordinates["Sonoma, CA"][0]] + [coordinates[loc][0] for loc in locations],                                                                            
+    "centroid_lon": [coordinates["Sonoma, CA"][1]] + [coordinates[loc][1] for loc in locations],                                                                            
+    "relocation_cost": [0] + [relocation_costs[loc] for loc in locations]                                                                                                   
+}                                                                                                                                                                           
+                                                                                                                                                                            
+df = pd.DataFrame(data)                                                                                                                                                     
+                                                                                                                                                                            
+# Generate the map                                                                                                                                                          
+import plotly.express as px                                                                                                                                                 
+                                                                                                                                                                            
+fig = px.scatter_mapbox(df, lat="centroid_lat", lon="centroid_lon", text="name", color="relocation_cost",                                                                   
+                        color_continuous_scale=px.colors.sequential.Magma, size_max=15, zoom=2, mapbox_style="carto-positron")                                              
+                                                                                                                                                                            
+fig.show()                                                                                                                                                                  
+fig.write_image("saved_map_test.png")                                                                                                                                            
+                                                                                                                                                                            
+# Provide the final answer                                                                                                                                                  
+#final_answer(fig)
+print(df.sort_values(by=["relocation_cost"], ascending=False))
 
 Never try to process strings using code: when you have a string to read, just print it and you'll see it.
 """)

@@ -139,7 +139,7 @@ fig = px.scatter_mapbox(df, lat="centroid_lat", lon="centroid_lon", text="name",
                         color_continuous_scale=px.colors.sequential.Magma, size_max=15, zoom=2, mapbox_style="carto-positron")                                              
                                                                                                                                                                             
 fig.show()                                                                                                                                                                  
-fig.write_image("saved_map.png")                                                                                                                                            
+fig.write_image("saved_map_test.png")                                                                                                                                            
                                                                                                                                                                             
 # Provide the final answer                                                                                                                                                  
 #final_answer(fig)

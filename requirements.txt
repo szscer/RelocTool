@@ -4,3 +4,4 @@ plotly
 shapely
 pandas
 numpy
+spyder-kernels==3.0.*
